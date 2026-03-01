@@ -1,0 +1,64 @@
+comment_style:
+  systemverilog: //
+  verilog: //
+  vhdl: --
+parser_settings:
+  ignore_prefix: ""
+languages:
+  - name: "Verilog"
+    enabled: true
+    extensions: ["v", "vh"]
+    line_comment: "//"
+    block_comment_start: "/*"
+    block_comment_end: "*/"
+  - name: "SystemVerilog"
+    enabled: true
+    extensions: ["sv", "svh"]
+    line_comment: "//"
+    block_comment_start: "/*"
+    block_comment_end: "*/"
+  - name: "VHDL"
+    enabled: true
+    extensions: ["vhd", "vhdl"]
+    line_comment: "--"
+    block_comment_start: null
+    block_comment_end: null
+  - name: "C/C++"
+    enabled: true
+    extensions: ["c", "cpp", "h", "hpp", "cc"]
+    line_comment: "//"
+    block_comment_start: "/*"
+    block_comment_end: "*/"
+  - name: "Python"
+    enabled: true
+    extensions: ["py"]
+    line_comment: "#"
+    block_comment_start: null # Python docstrings are technically code, but we can treat # as main
+    block_comment_end: null
+  - name: "Java/C#/Rust"
+    enabled: true
+    extensions: ["java", "cs", "rs"]
+    line_comment: "//"
+    block_comment_start: "/*"
+    block_comment_end: "*/"
+  - name: "MATLAB"
+    enabled: true
+    extensions: ["m"]
+    line_comment: "%"
+    block_comment_start: "%{"
+    block_comment_end: "%}"
+  - name: "Ada"
+    enabled: true
+    extensions: ["adb", "ads"]
+    line_comment: "--"
+    block_comment_start: null
+    block_comment_end: null
+regex_rules:
+  id_pattern: (?P<id>REQ\-\d+)
+tag_structure: '[{id_pattern}]'
+tags:
+  end_token: ']'
+  start_token: '['
+tokens:
+  id_num: \d+
+  prefix: REQ

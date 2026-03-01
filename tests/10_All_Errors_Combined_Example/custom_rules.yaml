@@ -1,0 +1,5 @@
+regex_rules:
+  id_pattern: 'PROJ-REQ-\d{3}'
+tags:
+  start_token: "["
+  end_token: "]"

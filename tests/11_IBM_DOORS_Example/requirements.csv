@@ -1,0 +1,4 @@
+ID,Type,Description,Verification Method,Validation Method,Traceability
+PROJ-PLD-1,Requirement,Top level reset logic.,Test,Traceability,PROJ-SYS-001
+PROJ-PLD-5,Information,This is just info header.,None,None,
+PROJ-PLD-135,Requirement,Complex state machine behavior.,Analysis,Traceability,PROJ-SYS-099

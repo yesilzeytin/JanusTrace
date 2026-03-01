@@ -1,0 +1,3 @@
+ID,Description
+REQ-VHDL-01,The controller shall be clocked.
+REQ-VHDL-02,The controller shall have asynchronous reset.

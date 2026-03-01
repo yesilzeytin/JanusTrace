@@ -1,0 +1,74 @@
+languages:
+- block_comment_end: '*/'
+  block_comment_start: /*
+  enabled: true
+  extensions:
+  - v
+  - vh
+  line_comment: //
+  name: Verilog
+- block_comment_end: '*/'
+  block_comment_start: /*
+  enabled: true
+  extensions:
+  - sv
+  - svh
+  line_comment: //
+  name: SystemVerilog
+- block_comment_end: ''
+  block_comment_start: ''
+  enabled: true
+  extensions:
+  - vhd
+  - vhdl
+  line_comment: --
+  name: VHDL
+- block_comment_end: '*/'
+  block_comment_start: /*
+  enabled: true
+  extensions:
+  - c
+  - cpp
+  - h
+  - hpp
+  - cc
+  line_comment: //
+  name: C/C++
+- block_comment_end: ''
+  block_comment_start: ''
+  enabled: true
+  extensions:
+  - py
+  line_comment: '#'
+  name: Python
+- block_comment_end: '*/'
+  block_comment_start: /*
+  enabled: true
+  extensions:
+  - java
+  - cs
+  - rs
+  line_comment: //
+  name: Java/C#/Rust
+- block_comment_end: '%}'
+  block_comment_start: '%{'
+  enabled: true
+  extensions:
+  - m
+  line_comment: '%'
+  name: MATLAB
+- block_comment_end: ''
+  block_comment_start: ''
+  enabled: true
+  extensions:
+  - adb
+  - ads
+  line_comment: --
+  name: Ada
+parser_settings:
+  ignore_prefix: ''
+regex_rules:
+  id_pattern: (?P<id>PROJ\-PLD\-\d+)
+tags:
+  end_token: ']'
+  start_token: '['

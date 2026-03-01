@@ -1,0 +1,6 @@
+tag_structure: "PROJ-PLD-{id}"
+tokens:
+  id: "\\d+"
+tags:
+  start_token: "["
+  end_token: "]"

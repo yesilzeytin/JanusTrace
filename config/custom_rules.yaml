@@ -1,0 +1,10 @@
+comment_style:
+  systemverilog: '// @req '
+  verilog: '// @req '
+  vhdl: '-- @req '
+tag_structure: '{project_id}-{doc_id}-{req_type}.{id_num}'
+tokens:
+  id_num: \d{3,5}
+  project_id: '[A-Z]{4}'
+  doc_id: '[A-Z]{3}'
+  req_type: (SRS|HLR|RTL)

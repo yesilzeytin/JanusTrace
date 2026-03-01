@@ -1,0 +1,6 @@
+regex_rules:
+  # Strict pattern: REQ- followed by EXACTLY 3 digits (Content only)
+  id_pattern: 'REQ-\d{3}'
+tags:
+  start_token: '['
+  end_token: ']'

@@ -1,0 +1,4 @@
+ID,Description
+REQ-001,The system shall control traffic lights.
+REQ-002,The default state upon reset shall be RED.
+REQ-003,The sequence shall be RED -> GREEN -> YELLOW -> RED.

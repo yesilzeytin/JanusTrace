@@ -1,0 +1,8 @@
+tag_structure: "REQ-{component}-{submodule}-{id}"
+tokens:
+  component: "[A-Z]{3}"   # e.g., CPU
+  submodule: "[A-Z]{3}"   # e.g., ALU
+  id: "\\d{3}"             # e.g., 001
+tags:
+  start_token: "{"
+  end_token: "}"
