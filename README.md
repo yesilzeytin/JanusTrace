@@ -16,12 +16,19 @@ The following require more testing and should be uploaded in a reasonable time:
 - Linux executable,
 - Git workflows.
 
+# Screenshots
+
+JanusTrace GUI application
 ![GUI on startup](docs/images/gui00.png)
 
+Visual regex generator for any format of requirement IDs
 ![Configuration REGEX generation with GUI](docs/images/gui01.png)
 
+Report generation logs inside GUI
 ![GUI report generation](docs/images/gui02.png)
 
+An example report
 ![An example report](docs/images/report00.png)
 
+Search any requirement inside the report
 ![Search functionality in report](docs/images/report01.png)
