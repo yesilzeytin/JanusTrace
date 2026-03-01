@@ -15,3 +15,13 @@ The following require more testing and should be uploaded in a reasonable time:
 - Build script for Linux,
 - Linux executable,
 - Git workflows.
+
+![GUI on startup](docs/images/gui00.png)
+
+![Configuration REGEX generation with GUI](docs/images/gui01.png)
+
+![GUI report generation](docs/images/gui02.png)
+
+![An example report](docs/images/report00.png)
+
+![Search functionality in report](docs/images/report01.png)
