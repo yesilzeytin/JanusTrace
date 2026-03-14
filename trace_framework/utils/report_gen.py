@@ -115,7 +115,10 @@ class ReportGenerator:
                 "category": html.escape(str(req.category or "")),
                 "status": item['status'],
                 "traces": traces_list,
-                "waiver_reason": html.escape(str(req.waiver_reason or "")) if req.status.value == "WAIVED" else ""
+                "waiver_reason": (
+                    html.escape(str(req.waiver_reason or ""))
+                    if req.status.value == "WAIVED" else ""
+                )
             })
 
         invalid_reqs_list = [
@@ -196,22 +199,39 @@ class ReportGenerator:
         issues = []
         for m in data['matrix']:
             if m['status'] == 'REQ_MISSING':
-                issues.append({"id": m['req'].id, "type": "Missing Requirement", "description": m['req'].description})
-        
+                issues.append({
+                    "id": m['req'].id,
+                    "type": "Missing Requirement",
+                    "description": m['req'].description
+                })
+
         for r in data['invalid_reqs']:
-            issues.append({"id": r.id, "type": "Invalid Requirement", "description": r.error_message or "Invalid Format"})
-            
+            issues.append({
+                "id": r.id,
+                "type": "Invalid Requirement",
+                "description": r.error_message or "Invalid Format"
+            })
+
         for t in data['orphans']:
-            issues.append({"id": getattr(t, 'req_id', 'Unknown'), "type": "Orphaned Trace", "description": f"Found in {getattr(t, 'source_file', '')}:{getattr(t, 'line_number', '')}"})
-            
+            issues.append({
+                "id": getattr(t, 'req_id', 'Unknown'),
+                "type": "Orphaned Trace",
+                "description": f"Found in {getattr(t, 'source_file', '')}:{getattr(t, 'line_number', '')}"
+            })
+
         for t in data['invalid_traces']:
-            issues.append({"id": getattr(t, 'req_id', 'Unknown'), "type": "Invalid Trace", "description": getattr(t, 'error_message', 'Invalid Format')})
-            
+            issues.append({
+                "id": getattr(t, 'req_id', 'Unknown'),
+                "type": "Invalid Trace",
+                "description": getattr(t, 'error_message', 'Invalid Format')
+            })
+
         out_path = os.path.join(self.output_dir, "unresolved_issues.json")
         try:
             with open(out_path, 'w', encoding='utf-8') as f:
                 json.dump(issues, f, indent=2)
             logger.info("Unresolved issues exported to %s", out_path)
+        # pylint: disable=broad-exception-caught
         except Exception as e:
             logger.error("Failed to export unresolved issues: %s", e)
 

@@ -19,7 +19,6 @@ class WaiverManagerWindow(ctk.CTkToplevel):
         super().__init__(parent)
         self.title("JanusTrace Waiver Manager")
         self.geometry("800x600")
-        
         self.issues = []
         self.row_widgets = []
 
@@ -60,11 +59,22 @@ class WaiverManagerWindow(ctk.CTkToplevel):
         header_frame = ctk.CTkFrame(self.list_frame, fg_color="transparent")
         header_frame.pack(fill="x", pady=(0, 5))
         
-        ctk.CTkLabel(header_frame, text="Waive?", width=60, anchor="center", font=("Helvetica", 12, "bold")).pack(side="left", padx=5)
-        ctk.CTkLabel(header_frame, text="Item ID", width=120, anchor="w", font=("Helvetica", 12, "bold")).pack(side="left", padx=5)
-        ctk.CTkLabel(header_frame, text="Type", width=150, anchor="w", font=("Helvetica", 12, "bold")).pack(side="left", padx=5)
-        ctk.CTkLabel(header_frame, text="Description", width=200, anchor="w", font=("Helvetica", 12, "bold")).pack(side="left", padx=5)
-        ctk.CTkLabel(header_frame, text="Waiver Reason", expand=True, anchor="w", font=("Helvetica", 12, "bold")).pack(side="left", padx=5, fill="x")
+        ctk.CTkLabel(
+            header_frame, text="Waive?", width=60, anchor="center", font=("Helvetica", 12, "bold")
+        ).pack(side="left", padx=5)
+        ctk.CTkLabel(
+            header_frame, text="Item ID", width=120, anchor="w", font=("Helvetica", 12, "bold")
+        ).pack(side="left", padx=5)
+        ctk.CTkLabel(
+            header_frame, text="Type", width=150, anchor="w", font=("Helvetica", 12, "bold")
+        ).pack(side="left", padx=5)
+        ctk.CTkLabel(
+            header_frame, text="Description", width=200, anchor="w", font=("Helvetica", 12, "bold")
+        ).pack(side="left", padx=5)
+        ctk.CTkLabel(
+            header_frame, text="Waiver Reason", expand=True, anchor="w",
+            font=("Helvetica", 12, "bold")
+        ).pack(side="left", padx=5, fill="x")
 
 
     def load_issues(self):
@@ -90,12 +100,15 @@ class WaiverManagerWindow(ctk.CTkToplevel):
                 raise ValueError("Expected a JSON list of issues.")
 
             self.issues = data
-            self.lbl_status.configure(text=f"Loaded {len(data)} issues from {os.path.basename(filepath)}")
+            self.lbl_status.configure(
+                text=f"Loaded {len(data)} issues from {os.path.basename(filepath)}"
+            )
             self.render_issues()
             self.btn_save.configure(state="normal")
         except Exception as e:
             messagebox.showerror("Failed to Load", f"Could not parse issues JSON:\n{e}")
 
+    # pylint: disable=too-many-locals
     def render_issues(self):
         """Render the rows for each issue loaded."""
         # Clear existing
@@ -103,7 +116,7 @@ class WaiverManagerWindow(ctk.CTkToplevel):
             widget_dict['frame'].destroy()
         self.row_widgets.clear()
 
-        for idx, issue in enumerate(self.issues):
+        for issue in self.issues:
             item_id = issue.get("id", "Unknown")
             item_type = issue.get("type", "Unknown")
             desc = issue.get("description", "")
@@ -117,13 +130,13 @@ class WaiverManagerWindow(ctk.CTkToplevel):
             waive_var = tk.BooleanVar(value=False)
             chk = ctk.CTkCheckBox(row_frame, text="", variable=waive_var, width=60)
             chk.pack(side="left", padx=5)
-            
             lbl_id = ctk.CTkLabel(row_frame, text=item_id, width=120, anchor="w")
             lbl_id.pack(side="left", padx=5)
 
-            lbl_type = ctk.CTkLabel(row_frame, text=item_type, width=150, anchor="w", text_color="#f5b7b1")
+            lbl_type = ctk.CTkLabel(
+                row_frame, text=item_type, width=150, anchor="w", text_color="#f5b7b1"
+            )
             lbl_type.pack(side="left", padx=5)
-            
             lbl_desc = ctk.CTkLabel(row_frame, text=short_desc, width=200, anchor="w")
             lbl_desc.pack(side="left", padx=5)
 
@@ -181,7 +194,9 @@ class WaiverManagerWindow(ctk.CTkToplevel):
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(waiver_dict, f, indent=4)
-            messagebox.showinfo("Success", f"{len(waiver_dict)} waivers saved successfully to:\n{filepath}")
+            messagebox.showinfo(
+                "Success", f"{len(waiver_dict)} waivers saved successfully to:\n{filepath}"
+            )
             self.destroy() # Close window
         except Exception as e:
             messagebox.showerror("Save Failed", f"Could not save waivers:\n{e}")

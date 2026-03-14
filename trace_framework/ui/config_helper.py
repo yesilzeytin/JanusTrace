@@ -1,6 +1,10 @@
+"""
+Helper module for configuration management and regex building.
+"""
 import re
 
 class ConfigHelper:
+    """Helper class for configuration."""
     @staticmethod
     def generate_regex_from_id(example_id: str) -> str:
         """
@@ -54,6 +58,7 @@ class VisualBuilder:
     """
     @staticmethod
     def compile_regex(components: list) -> str:
+        """Compiles a regex string from a list of components."""
         pattern_parts = []
         for comp in components:
             ctype = comp.get('type')
@@ -88,6 +93,7 @@ class VisualBuilder:
 
     @staticmethod
     def generate_description(components: list) -> str:
+        """Generates a human-readable description from a list of components."""
         if not components:
             return "No components defined."
 
@@ -113,4 +119,3 @@ class VisualBuilder:
                 desc_parts.append(f"Variable ({count_text} {t_text})")
 
         return " followed by ".join(desc_parts) + "."
-

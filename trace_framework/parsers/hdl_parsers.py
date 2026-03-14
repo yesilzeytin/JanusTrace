@@ -26,7 +26,8 @@ class SourceCodeParser(SourceParser):
     def _build_extension_map(self) -> Dict[str, List[dict]]:
         """
         Builds a map of extension -> list of language configs.
-        Example: {'h': [{'name': 'C', 'line_comment': '//'}, {'name': 'Verilog', 'line_comment': '//'}]}
+        Example: {'h': [{'name': 'C', 'line_comment': '//'},
+                         {'name': 'Verilog', 'line_comment': '//'}]}
         """
         ext_map = collections.defaultdict(list)
 

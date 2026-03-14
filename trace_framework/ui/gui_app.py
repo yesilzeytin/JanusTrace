@@ -1,7 +1,7 @@
 """
 Main Application GUI for JanusTrace.
 """
-# pylint: disable=wrong-import-position,wrong-import-order,too-many-instance-attributes,too-many-statements,too-many-branches,too-many-locals,broad-exception-caught,attribute-defined-outside-init,too-many-public-methods,missing-function-docstring
+# pylint: disable=wrong-import-position,wrong-import-order,too-many-instance-attributes,too-many-statements,too-many-branches,too-many-locals,broad-exception-caught,attribute-defined-outside-init,too-many-public-methods,missing-function-docstring,line-too-long,too-many-lines,import-outside-toplevel,multiple-statements,missing-class-docstring
 
 import os
 import sys
@@ -16,6 +16,7 @@ def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
+        # pylint: disable=protected-access,no-member
         base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
@@ -34,7 +35,6 @@ from trace_framework.core.engine import TraceabilityEngine
 from trace_framework.utils.report_gen import ReportGenerator
 from trace_framework.utils.config_validator import ConfigValidator
 from trace_framework.ui.waiver_manager import WaiverManagerWindow
-import json
 
 RECENT_FILE = os.path.join("config", "recent.json")
 

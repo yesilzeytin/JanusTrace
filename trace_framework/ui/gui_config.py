@@ -7,6 +7,7 @@ from tkinter import messagebox, filedialog
 import yaml
 
 class ConfigWizard:
+    # pylint: disable=too-few-public-methods
     """GUI Tool to create custom_rules.yaml"""
     def __init__(self, root):
         self.root = root
@@ -14,24 +15,37 @@ class ConfigWizard:
         self.root.geometry("600x500")
 
         # Header
-        tk.Label(root, text="Requirement Traceability Configuration", font=("Helvetica", 16)).pack(pady=10)
+        tk.Label(
+            root, text="Requirement Traceability Configuration", font=("Helvetica", 16)
+        ).pack(pady=10)
 
         # Tag Structure
-        tk.Label(root, text="Tag Structure (e.g., {project}-{id})", anchor="w").pack(fill="x", padx=20)
+        tk.Label(
+            root, text="Tag Structure (e.g., {project}-{id})", anchor="w"
+        ).pack(fill="x", padx=20)
         self.tag_entry = tk.Entry(root)
         self.tag_entry.pack(fill="x", padx=20, pady=5)
         self.tag_entry.insert(0, "{project_id}-{req_type}-{id_num}")
 
         # Tokens
-        tk.Label(root, text="Tokens (YAML format: key: regex)", anchor="w").pack(fill="x", padx=20)
-        tk.Label(root, text="Example:\nproject_id: \"[A-Z]{3}\"", justify="left", fg="gray").pack(fill="x", padx=20)
+        tk.Label(
+            root, text="Tokens (YAML format: key: regex)", anchor="w"
+        ).pack(fill="x", padx=20)
+        tk.Label(
+            root, text="Example:\nproject_id: \"[A-Z]{3}\"", justify="left", fg="gray"
+        ).pack(fill="x", padx=20)
 
         self.tokens_text = tk.Text(root, height=10)
         self.tokens_text.pack(fill="both", expand=True, padx=20, pady=5)
-        self.tokens_text.insert(tk.END, "project_id: \"[A-Z]{3}\"\nreq_type: \"(SRS|HLR)\"\nid_num: \"\\\\d{3,5}\"")
+        self.tokens_text.insert(
+            tk.END, "project_id: \"[A-Z]{3}\"\nreq_type: \"(SRS|HLR)\"\nid_num: \"\\\\d{3,5}\""
+        )
 
         # Save Button
-        tk.Button(root, text="Save Configuration", command=self.save_config, bg="#4CAF50", fg="white", font=("Helvetica", 10, "bold")).pack(pady=20)
+        tk.Button(
+            root, text="Save Configuration", command=self.save_config,
+            bg="#4CAF50", fg="white", font=("Helvetica", 10, "bold")
+        ).pack(pady=20)
 
     def save_config(self):
         """Validates and saves tokens to YAML."""
