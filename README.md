@@ -26,14 +26,17 @@ Requirement-based development workflows — whether under **DO-178C**, **DO-254*
 
 ## Screenshots
 
-JanusTrace GUI on startup  
-![GUI on startup](docs/images/gui00.png)
+Scan your source files to be traced with your requirements
+![GUI Code Trace](docs/images/gui00.png)
+
+Or scan different levels of requirement files to be traced with each other
+![GUI Requirement Level Trace](docs/images/gui02.png)
 
 Visual regex generator for any requirement ID format  
 ![Configuration REGEX generation with GUI](docs/images/gui01.png)
 
-Live scan log with progress bar  
-![GUI report generation](docs/images/gui02.png)
+Each report generates a JSON file for "unresolved issues". Just load them to waive anything you want
+![Waiver Management](docs/waiver.png)
 
 An example traceability report  
 ![An example report](docs/images/report00.png)
