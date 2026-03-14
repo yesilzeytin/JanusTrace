@@ -280,4 +280,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-*This project was built with the assistance of agentic AI tools (Gemini 2.5 Pro & Claude 3.7 Sonnet). All design decisions, architecture choices, and final code review were performed by the author.*
+*This project was built with the assistance of agentic AI tools (Gemini 3.1 Pro & Claude 4.6 Sonnet on Google Antigravity). All design decisions, architecture choices, and final code review were performed by the author.*
