@@ -1,6 +1,6 @@
 # Contributing to JanusTrace
 
-First off, thank you for considering contributing to JanusTrace! It's people like you that make JanusTrace such a great tool.
+First off, thank you for considering contributing to JanusTrace! I would be glad if you'd be interested in contributing.
 
 ## Where do I go from here?
 
