@@ -36,7 +36,7 @@ Visual regex generator for any requirement ID format
 ![Configuration REGEX generation with GUI](docs/images/gui01.png)
 
 Each report generates a JSON file for "unresolved issues". Just load them to waive anything you want
-![Waiver Management](docs/waiver.png)
+![Waiver Management](docs/waiver00.png)
 
 An example traceability report  
 ![An example report](docs/images/report00.png)
