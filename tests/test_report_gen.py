@@ -128,7 +128,7 @@ class TestReportGenerator(unittest.TestCase):
         expected_keys = {
             'generated_at', 'stats', 'matrix',
             'invalid_reqs', 'orphans', 'invalid_traces',
-            'duplicate_reqs', 'r2r',
+            'duplicate_reqs', 'waived_traces', 'r2r',
         }
         self.assertEqual(set(data.keys()), expected_keys)
 
