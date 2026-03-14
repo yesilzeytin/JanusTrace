@@ -21,6 +21,7 @@ Requirement-based development workflows — whether under **DO-178C**, **DO-254*
 - **Recent projects** — the GUI remembers your last-used paths across sessions
 - **Multi-file requirements** — combine requirements from multiple CSVs or Excel files in a single scan
 - **CLI and GUI** — run headlessly with `main.py` or use the full GUI with `main_gui.py`
+- Totally offline processing, so the confidentiality of the requirements and source codes isn't compromised.
 
 ---
 
