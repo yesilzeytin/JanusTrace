@@ -39,7 +39,7 @@ def get_project_root():
 
 def main():
     parser = argparse.ArgumentParser(description="JanusTrace Cleanup Utility. Removes generated files, builds, and caches.")
-    
+
     parser.add_argument('--reports', action='store_true', help='Clean HTML and JSON reports in reports/ and tests/test_outputs/')
     parser.add_argument('--build', action='store_true', help='Clean PyInstaller build/, dist/, and .spec files')
     parser.add_argument('--cache', action='store_true', help='Clean Python __pycache__ and .pytest_cache directories')
@@ -62,13 +62,13 @@ def main():
         print("\nCleaning Reports...")
         clean_directory("reports")
         clean_directory("tests/test_outputs")
-        
+
         # Clean up any loose reports that might accidentally be in the root or test folders
         # Exclude README.html from cleanup
         for html_file in glob.glob("*.html"):
             if "readme" not in html_file.lower():
                 clean_files(html_file, args.dry_run)
-                
+
         clean_files("tests/*.html", args.dry_run)
         clean_files("*.json", args.dry_run)
         # Exclude specific non-report json if necessary, but we don't have config json

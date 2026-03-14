@@ -125,7 +125,11 @@ class TestReportGenerator(unittest.TestCase):
         with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        expected_keys = {'generated_at', 'stats', 'matrix', 'invalid_reqs', 'orphans', 'invalid_traces'}
+        expected_keys = {
+            'generated_at', 'stats', 'matrix',
+            'invalid_reqs', 'orphans', 'invalid_traces',
+            'duplicate_reqs', 'r2r',
+        }
         self.assertEqual(set(data.keys()), expected_keys)
 
     def test_json_report_stats(self):

@@ -1,0 +1,18 @@
+# Configuration for the extreme performance test
+regex_rules:
+  id_pattern: "XTRACE-\\d{4}"
+tags:
+  start_token: "["
+  end_token: "]"
+columns:
+  id: ID
+  description: Description
+  category: Category
+  parent: Parent
+languages:
+  - name: SystemVerilog
+    enabled: true
+    extensions: [sv, svh]
+    line_comment: "//"
+    block_comment_start: "/*"
+    block_comment_end: "*/"

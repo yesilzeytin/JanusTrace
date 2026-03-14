@@ -62,3 +62,10 @@ tags:
 tokens:
   id_num: \d+
   prefix: REQ
+# Optional: configure which columns to read from the requirements file.
+# Defaults shown below. Add 'parent' to enable R2R (requirement-to-requirement) traceability.
+# columns:
+#   id: ID
+#   description: Description
+#   category: Category
+#   parent: Parent   # <-- optional: enables hierarchy tracking in the HTML report
