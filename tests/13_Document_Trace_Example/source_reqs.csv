@@ -1,0 +1,7 @@
+ID,Description,Parent_HLR
+LLR-001,UI shall show Celsius on screen,HLR-001
+LLR-002,UI shall show Fahrenheit on toggle,HLR-001
+LLR-003,Logger shall write to errors.txt,HLR-002
+LLR-004,Logger shall rotate files,HLR-002
+LLR-005,Unknown orphaned feature,HLR-999
+LLR-006,This has an invalid target link,HLR_INVALID

@@ -1,3 +1,7 @@
+"""
+RegexBuilder for constructing tag match patterns.
+"""
+# pylint: disable=too-few-public-methods
 import re
 
 class RegexBuilder:
@@ -18,24 +22,24 @@ class RegexBuilder:
 
         tag_structure = self.config.get('tag_structure', '')
         tokens = self.config.get('tokens', {})
-        
+
         # We need to escape special regex characters in the structure (like '.')
         # BUT we must preserve the {token} placeholders.
         # Strategy: Split by placeholders, escape the parts, then rejoin.
-        
+
         # Find all placeholders like {token_name}
         # We use a regex to find them
         placeholder_re = re.compile(r'\{(\w+)\}')
-        
+
         parts = []
         last_pos = 0
-        
+
         for match in placeholder_re.finditer(tag_structure):
             # Text before the placeholder
             text_before = tag_structure[last_pos:match.start()]
             if text_before:
                 parts.append(re.escape(text_before))
-            
+
             token_name = match.group(1)
             if token_name in tokens:
                 # Replace with named group
@@ -46,12 +50,12 @@ class RegexBuilder:
                 # User probably forgot to define it.
                 # Let's escape it to be safe, so it matches literal "{token_name}"
                 parts.append(re.escape(match.group(0)))
-                
+
             last_pos = match.end()
-            
+
         # Text after the last placeholder
         text_after = tag_structure[last_pos:]
         if text_after:
             parts.append(re.escape(text_after))
-            
+
         return "".join(parts)

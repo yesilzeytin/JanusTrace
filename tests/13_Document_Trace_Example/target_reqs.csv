@@ -1,0 +1,4 @@
+ID,Description,Category
+HLR-001,System shall display temperature,Display
+HLR-002,System shall log errors,Logging
+HLR-003,System shall sound alarm on overheat,Alarm

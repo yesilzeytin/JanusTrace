@@ -1,0 +1,11 @@
+regex_rules:
+  id_pattern: "^(HLR|LLR)-[\\dA-Z]+$"
+columns:
+  id: "ID"
+  description: "Description"
+  category: "Category"
+tags:
+  start_token: "["
+  end_token: "]"
+parser_settings:
+  ignore_prefix: ""

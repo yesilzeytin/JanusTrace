@@ -4,6 +4,7 @@ Core data models for the JanusTrace framework.
 This module defines the primary data structures used throughout the tool
 to represent parsed requirements and discovered source code traces.
 """
+# pylint: disable=too-many-instance-attributes
 from dataclasses import dataclass
 from typing import Optional
 from enum import Enum
@@ -12,6 +13,7 @@ class ValidationStatus(Enum):
     """Indicates the validation state of a requirement or trace."""
     VALID = "VALID"
     INVALID_FORMAT = "INVALID_FORMAT"
+    WAIVED = "WAIVED"
 
 @dataclass
 class Requirement:
@@ -24,15 +26,19 @@ class Requirement:
         source_file: The path to the file where this requirement is defined.
         line_number: The row number in the source file.
         status: Validation status of the requirement ID format.
+        status: ValidationStatus of the requirement ID format.
         error_message: Detailed error string if validation fails.
+        waiver_reason: Reason string if the requirement is waived.
     """
     id: str
     description: str
     category: Optional[str] = None
+    parent_id: Optional[str] = None
     source_file: Optional[str] = None
     line_number: Optional[int] = None
     status: ValidationStatus = ValidationStatus.VALID
     error_message: Optional[str] = None
+    waiver_reason: Optional[str] = None
 
 @dataclass
 class TraceObject:
@@ -44,7 +50,9 @@ class TraceObject:
         line_number: The line number where the tag was found.
         context: The surrounding code/comment text where the tag appeared.
         status: Validation status of the trace tag format.
+        status: Validation status of the trace tag format.
         error_message: Detailed error string if validation fails.
+        waiver_reason: Reason string if the trace orphaned tag is waived.
     """
     req_id: str
     source_file: str
@@ -52,3 +60,4 @@ class TraceObject:
     context: str = ""
     status: ValidationStatus = ValidationStatus.VALID
     error_message: Optional[str] = None
+    waiver_reason: Optional[str] = None

@@ -7,6 +7,7 @@ Produces three output formats:
   3. All reports use timestamped filenames to prevent overwrites
 """
 
+import html
 import json
 import logging
 import os
@@ -59,6 +60,8 @@ class ReportGenerator:
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
 
+        self._export_unresolved_issues(data)
+
         logger.info("HTML report written to %s", output_path)
         return output_path
 
@@ -83,6 +86,8 @@ class ReportGenerator:
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(report_data, f, indent=2)
 
+        self._export_unresolved_issues(data)
+
         logger.info("JSON report written to %s", output_path)
         return output_path
 
@@ -98,50 +103,73 @@ class ReportGenerator:
             req = item['req']
             traces_list = [
                 {
-                    "file": t.source_file,
+                    "file": html.escape(str(t.source_file)),
                     "line": t.line_number,
-                    "context": t.context,
+                    "context": html.escape(str(t.context)),
                 }
                 for t in item['traces']
             ]
             matrix_rows.append({
-                "id": req.id,
-                "description": req.description,
-                "category": req.category or "",
+                "id": html.escape(str(req.id)),
+                "description": html.escape(str(req.description)),
+                "category": html.escape(str(req.category or "")),
                 "status": item['status'],
                 "traces": traces_list,
+                "waiver_reason": html.escape(str(req.waiver_reason or "")) if req.status.value == "WAIVED" else ""
             })
 
         invalid_reqs_list = [
             {
-                "id": r.id,
-                "description": r.description,
-                "error": r.error_message or "",
+                "id": html.escape(str(r.id)),
+                "description": html.escape(str(r.description)),
+                "error": html.escape(str(r.error_message or "")),
             }
             for r in data['invalid_reqs']
         ]
 
         orphans_list = [
             {
-                "tag": t.req_id,
-                "file": t.source_file,
+                "tag": html.escape(str(t.req_id)),
+                "file": html.escape(str(t.source_file)),
                 "line": t.line_number,
-                "context": t.context,
+                "context": html.escape(str(t.context)),
             }
             for t in data['orphans']
         ]
 
         invalid_traces_list = [
             {
-                "tag": t.req_id,
-                "file": t.source_file,
+                "tag": html.escape(str(t.req_id)),
+                "file": html.escape(str(t.source_file)),
                 "line": t.line_number,
-                "context": t.context,
-                "error": t.error_message or "",
+                "context": html.escape(str(t.context)),
+                "error": html.escape(str(t.error_message or "")),
             }
             for t in data['invalid_traces']
         ]
 
+        duplicate_reqs_list = [
+            {
+                "id": html.escape(str(r.id)),
+                "description": html.escape(str(r.description)),
+                "source_file": html.escape(str(r.source_file or "")),
+                "line_number": r.line_number,
+            }
+            for r in data.get('duplicate_reqs', [])
+        ]
+
+        waived_traces_list = [
+            {
+                "tag": html.escape(str(getattr(t, 'req_id', ''))),
+                "file": html.escape(str(getattr(t, 'source_file', ''))),
+                "line": getattr(t, 'line_number', 0),
+                "context": html.escape(str(getattr(t, 'context', ''))),
+                "reason": html.escape(str(getattr(t, 'waiver_reason', '')))
+            }
+            for t in data.get('waived_items', []) if not hasattr(t, 'description')
+        ]
+
+        r2r = data.get('r2r', {})
         return {
             "generated_at": datetime.now().isoformat(),
             "stats": data['stats'],
@@ -149,11 +177,43 @@ class ReportGenerator:
             "invalid_reqs": invalid_reqs_list,
             "orphans": orphans_list,
             "invalid_traces": invalid_traces_list,
+            "duplicate_reqs": duplicate_reqs_list,
+            "waived_traces": waived_traces_list,
+            "r2r": {
+                "has_r2r": r2r.get('has_r2r', False),
+                "hierarchy": r2r.get('hierarchy', {}),
+                "orphaned_parents": r2r.get('orphaned_parents', []),
+                "cycles": r2r.get('cycles', []),
+            },
         }
 
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+
+    def _export_unresolved_issues(self, data: Dict[str, Any]):
+        """Exports an unresolved_issues.json file for the Waiver Manager."""
+        issues = []
+        for m in data['matrix']:
+            if m['status'] == 'REQ_MISSING':
+                issues.append({"id": m['req'].id, "type": "Missing Requirement", "description": m['req'].description})
+        
+        for r in data['invalid_reqs']:
+            issues.append({"id": r.id, "type": "Invalid Requirement", "description": r.error_message or "Invalid Format"})
+            
+        for t in data['orphans']:
+            issues.append({"id": getattr(t, 'req_id', 'Unknown'), "type": "Orphaned Trace", "description": f"Found in {getattr(t, 'source_file', '')}:{getattr(t, 'line_number', '')}"})
+            
+        for t in data['invalid_traces']:
+            issues.append({"id": getattr(t, 'req_id', 'Unknown'), "type": "Invalid Trace", "description": getattr(t, 'error_message', 'Invalid Format')})
+            
+        out_path = os.path.join(self.output_dir, "unresolved_issues.json")
+        try:
+            with open(out_path, 'w', encoding='utf-8') as f:
+                json.dump(issues, f, indent=2)
+            logger.info("Unresolved issues exported to %s", out_path)
+        except Exception as e:
+            logger.error("Failed to export unresolved issues: %s", e)
 
     @staticmethod
     def _timestamped_filename(base_filename: str) -> str:
@@ -200,7 +260,9 @@ class ReportGenerator:
             --color-invalid-req-text: #cccccc;
             --color-invalid-trace: #4a1c1d;
             --color-invalid-trace-text: #f5b7b1;
-            
+            --color-waived: #1a365d;       /* Dark blue for waived */
+            --color-waived-text: #90cdf4;  /* Light blue text */
+
             --color-bg: #1b1b1b;           /* Hufflepuff dark background */
             --color-surface: #262626;      /* Slightly lighter surface */
             --color-border: #404040;       /* Border color */
@@ -262,6 +324,13 @@ class ReportGenerator:
         .stat-card.coverage .value {{
             color: var(--color-primary);
             font-size: 2rem;
+        }}
+        .stat-card.waived {{
+            border-color: #3182ce;
+            background: #2a4365;
+        }}
+        .stat-card.waived .value {{
+            color: #90cdf4;
         }}
 
         /* --------- Legend --------- */
@@ -343,6 +412,7 @@ class ReportGenerator:
         tr.trace_orphan    {{ background: var(--color-orphan); color: var(--color-orphan-text); }}
         tr.req_invalid     {{ background: var(--color-invalid-req); color: var(--color-invalid-req-text); }}
         tr.trace_invalid   {{ background: var(--color-invalid-trace); color: var(--color-invalid-trace-text); }}
+        tr.waived          {{ background: var(--color-waived); color: var(--color-waived-text); }}
 
         code {{
             background: rgba(255,255,255,0.1);
@@ -354,6 +424,36 @@ class ReportGenerator:
         h2 {{
             margin-bottom: 8px;
             font-size: 1.3rem;
+        }}
+
+        /* --------- Tabs --------- */
+        .tabs {{
+            display: flex;
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 24px;
+        }}
+        .tab-btn {{
+            background: transparent;
+            border: none;
+            color: var(--color-muted);
+            padding: 12px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }}
+        .tab-btn:hover {{
+            color: var(--color-text);
+        }}
+        .tab-btn.active {{
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-primary);
+        }}
+        .tab-content {{
+            display: none;
+        }}
+        .tab-content.active {{
+            display: block;
         }}
 
         .no-results {{
@@ -379,48 +479,73 @@ class ReportGenerator:
     <div class="legend-item"><span class="legend-swatch" style="background:var(--color-orphan)"></span> TRACE_ORPHAN: No matching req</div>
     <div class="legend-item"><span class="legend-swatch" style="background:var(--color-invalid-req)"></span> REQ_INVALID: Bad ID format</div>
     <div class="legend-item"><span class="legend-swatch" style="background:var(--color-invalid-trace)"></span> TRACE_INVALID: Bad tag format</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:var(--color-waived)"></span> WAIVED: Ignored intentionally</div>
 </div>
 
-<!-- Requirements Matrix -->
-<h2>Requirements Matrix</h2>
-<div class="toolbar">
-    <input type="text" id="search-req" placeholder="Search by ID or description..." oninput="renderReqTable()">
-    <select id="filter-status" onchange="renderReqTable()">
-        <option value="ALL">All Statuses</option>
-        <option value="OK">OK</option>
-        <option value="REQ_MISSING">Missing</option>
-        <option value="REQ_INVALID">Invalid</option>
-    </select>
+<!-- Tabs Navigation -->
+<div class="tabs">
+    <button class="tab-btn active" onclick="openTab(event, 'tab-matrix')">Requirements Matrix</button>
+    <button class="tab-btn" id="btn-tab-traces" onclick="openTab(event, 'tab-traces')">Trace Log</button>
+    <button class="tab-btn" id="btn-tab-r2r" onclick="openTab(event, 'tab-r2r')" style="display:none;">R2R Hierarchy</button>
 </div>
-<table id="req-table">
-    <thead>
-        <tr>
-            <th onclick="sortReqTable('id')">ID <span class="sort-arrow" id="sort-id"></span></th>
-            <th onclick="sortReqTable('description')">Description <span class="sort-arrow" id="sort-description"></span></th>
-            <th onclick="sortReqTable('status')">Status <span class="sort-arrow" id="sort-status"></span></th>
-            <th>Source Files</th>
-        </tr>
-    </thead>
-    <tbody id="req-tbody"></tbody>
-</table>
 
-<!-- Code Traces -->
-<h2>Code Traces</h2>
-<div class="toolbar">
-    <input type="text" id="search-trace" placeholder="Search traces..." oninput="renderTraceTable()">
+<div id="tab-matrix" class="tab-content active">
+    <!-- Requirements Matrix -->
+    <h2>Requirements Matrix</h2>
+    <div class="toolbar">
+        <input type="text" id="search-req" placeholder="Search by ID or description..." oninput="renderReqTable()">
+        <select id="filter-status" onchange="renderReqTable()">
+            <option value="ALL">All Statuses</option>
+            <option value="OK">OK</option>
+            <option value="REQ_MISSING">Missing</option>
+            <option value="REQ_INVALID">Invalid Reqs</option>
+            <option value="WAIVED">Waived</option>
+        </select>
+    </div>
+    <table id="req-table">
+        <thead>
+            <tr>
+                <th onclick="sortReqTable('id')">ID <span class="sort-arrow" id="sort-id"></span></th>
+                <th onclick="sortReqTable('description')">Description <span class="sort-arrow" id="sort-description"></span></th>
+                <th onclick="sortReqTable('status')">Status <span class="sort-arrow" id="sort-status"></span></th>
+                <th>Details / Source Files</th>
+            </tr>
+        </thead>
+        <tbody id="req-tbody"></tbody>
+    </table>
 </div>
-<table id="trace-table">
-    <thead>
-        <tr>
-            <th>Tag</th>
-            <th>File</th>
-            <th>Line</th>
-            <th>Status</th>
-            <th>Context</th>
-        </tr>
-    </thead>
-    <tbody id="trace-tbody"></tbody>
-</table>
+
+<div id="tab-traces" class="tab-content">
+    <!-- Code Traces -->
+    <h2>Trace Log</h2>
+    <div class="toolbar">
+        <input type="text" id="search-trace" placeholder="Search traces..." oninput="renderTraceTable()">
+    </div>
+    <table id="trace-table">
+        <thead>
+            <tr>
+                <th>Tag</th>
+                <th>File / Source</th>
+                <th>Line / Trace ID</th>
+                <th>Status</th>
+                <th>Context</th>
+            </tr>
+        </thead>
+        <tbody id="trace-tbody"></tbody>
+    </table>
+</div>
+
+<div id="tab-r2r" class="tab-content">
+    <!-- R2R Hierarchy (shown only if Parent column was present) -->
+    <div id="r2r-section">
+        <h2>Requirement Hierarchy (R2R)</h2>
+        <p style="color:var(--color-muted);font-size:0.85rem;margin-bottom:12px;">
+            Requirements with a defined <strong>Parent</strong> ID are shown below. Expand a parent to see its children.
+        </p>
+        <div id="r2r-warnings"></div>
+        <div id="r2r-tree" style="font-family:monospace;font-size:0.9rem;"></div>
+    </div>
+</div>
 
 <!-- Embedded JSON data -->
 <script type="application/json" id="report-data">
@@ -432,6 +557,36 @@ class ReportGenerator:
 // Data Loading
 // ========================
 const DATA = JSON.parse(document.getElementById('report-data').textContent);
+
+// ========================
+// Tab Management
+// ========================
+function openTab(evt, tabId) {{
+    // Hide all tab content
+    const tabContents = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabContents.length; i++) {{
+        tabContents[i].classList.remove("active");
+    }}
+    // Remove active class from buttons
+    const tabBtns = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < tabBtns.length; i++) {{
+        tabBtns[i].classList.remove("active");
+    }}
+    // Show current tab, add active to button
+    document.getElementById(tabId).classList.add("active");
+    if (evt && evt.currentTarget) {{
+        evt.currentTarget.classList.add("active");
+    }} else if (evt && typeof evt === 'string') {{
+        // Manual trigger by ID
+        document.getElementById(evt).classList.add("active");
+    }}
+}}
+
+// Setup external link to open traces tab
+function switchToTracesTab() {{
+    openTab('btn-tab-traces', 'tab-traces');
+    window.scrollTo(0, 0);
+}}
 
 // ========================
 // Stats Rendering
@@ -450,13 +605,18 @@ const DATA = JSON.parse(document.getElementById('report-data').textContent);
         {{ label: 'Orphaned Traces', value: s.orphaned_traces }},
         {{ label: 'Invalid Reqs', value: s.invalid_reqs_count }},
         {{ label: 'Invalid Traces', value: s.invalid_traces_count }},
+        {{ label: 'Waived Items', value: s.waived_items_count || 0, cls: 'waived' }}
     ];
-    grid.innerHTML = cards.map(c =>
-        `<div class="stat-card ${{c.cls || ''}}">
+    grid.innerHTML = cards.map(c => {{
+        let cardHtml = `<div class="stat-card ${{c.cls || ''}}">
             <div class="value">${{c.value}}</div>
             <div class="label">${{c.label}}</div>
-        </div>`
-    ).join('');
+        </div>`;
+        if (c.label.includes('Invalid') || c.label.includes('Orphaned')) {{
+            return `<a href="javascript:void(0)" onclick="switchToTracesTab()" style="text-decoration:none;color:inherit;" title="Click to view traces list">${{cardHtml}}</a>`;
+        }}
+        return cardHtml;
+    }}).join('');
 }})();
 
 // ========================
@@ -524,14 +684,19 @@ function renderReqTable() {{
     }}
     tbody.innerHTML = rows.map(r => {{
         const css = r.status.toLowerCase();
-        const files = r.traces && r.traces.length > 0
-            ? r.traces.map(t => t.file + ' (Line ' + t.line + ')').join('<br>')
-            : (r.error || '-');
+        let details = '';
+        if (r.status === 'WAIVED') {{
+            details = '<strong>Reason:</strong> ' + r.waiver_reason;
+        }} else if (r.traces && r.traces.length > 0) {{
+            details = r.traces.map(t => t.file + ' (Line ' + t.line + ')').join('<br>');
+        }} else {{
+            details = (r.error || '-');
+        }}
         return `<tr class="${{css}}">
             <td>${{r.id}}</td>
             <td>${{r.description}}</td>
             <td>${{r.status}}</td>
-            <td>${{files}}</td>
+            <td>${{details}}</td>
         </tr>`;
     }}).join('');
 }}
@@ -553,6 +718,11 @@ function renderTraceTable() {{
     DATA.invalid_traces.forEach(t => {{
         rows.push({{ tag: t.tag, file: t.file, line: t.line, status: 'TRACE_INVALID', context: t.context, error: t.error }});
     }});
+    if (DATA.waived_traces) {{
+        DATA.waived_traces.forEach(t => {{
+            rows.push({{ tag: t.tag, file: t.file, line: t.line, status: 'WAIVED', context: t.context, error: t.reason }});
+        }});
+    }}
 
     // Filter
     if (search) {{
@@ -571,7 +741,7 @@ function renderTraceTable() {{
     tbody.innerHTML = rows.map(r => {{
         const css = r.status.toLowerCase();
         const ctx = r.error
-            ? `<code>${{r.context}}</code><br><small>${{r.error}}</small>`
+            ? `<code>${{r.context}}</code><br><small><strong>Note:</strong> ${{r.error}}</small>`
             : `<code>${{r.context}}</code>`;
         return `<tr class="${{css}}">
             <td>${{r.tag}}</td>
@@ -584,6 +754,70 @@ function renderTraceTable() {{
 }}
 
 renderTraceTable();
+
+// ========================
+// R2R Hierarchy
+// ========================
+(function renderR2R() {{
+    const r2r = DATA.r2r;
+    if (!r2r || !r2r.has_r2r) return;
+    document.getElementById('btn-tab-r2r').style.display = 'inline-block';
+
+    // Warnings
+    const warnDiv = document.getElementById('r2r-warnings');
+    let warnHtml = '';
+    if (r2r.cycles && r2r.cycles.length > 0) {{
+        warnHtml += `<div style="background:#4a1c1d;border:1px solid #c0392b;border-radius:6px;padding:12px;margin-bottom:12px;color:#f5b7b1;">
+            ⚠️ <strong>${{r2r.cycles.length}} Cycle(s) Detected</strong><br>
+            ${{r2r.cycles.map(c => c.join(' → ')).join('<br>')}}
+        </div>`;
+    }}
+    if (r2r.orphaned_parents && r2r.orphaned_parents.length > 0) {{
+        warnHtml += `<div style="background:#4d4420;border:1px solid #d4ac0d;border-radius:6px;padding:12px;margin-bottom:12px;color:#f9e79f;">
+            ⚠️ <strong>${{r2r.orphaned_parents.length}} Missing Parent Reference(s)</strong><br>
+            ${{r2r.orphaned_parents.map(o => `<code>${{o.child_id}}</code> references non-existent parent <code>${{o.missing_parent_id}}</code>`).join('<br>')}}
+        </div>`;
+    }}
+    warnDiv.innerHTML = warnHtml;
+
+    // Tree
+    const hier = r2r.hierarchy || {{}};
+    const treeDiv = document.getElementById('r2r-tree');
+
+    function buildNode(parentId, depth) {{
+        const children = hier[parentId] || [];
+        const indent = '&nbsp;&nbsp;&nbsp;&nbsp;'.repeat(depth);
+        let html = '';
+        const hasChildren = children.length > 0;
+        html += `<div style="padding:4px 0;">`;
+        html += `${{indent}}`;
+        if (hasChildren) {{
+            html += `<span style="cursor:pointer;color:var(--color-primary);" onclick="this.parentElement.nextElementSibling.style.display=(this.parentElement.nextElementSibling.style.display==='none'?'':'none');this.textContent=(this.textContent==='▶'?'▼':'▶');">▼</span> `;
+        }} else {{
+            html += `<span style="color:var(--color-muted);">└</span> `;
+        }}
+        html += `<strong style="color:var(--color-primary);">${{parentId}}</strong>`;
+        html += `</div>`;
+        if (hasChildren) {{
+            html += `<div>`;
+            children.forEach(childId => {{ html += buildNode(childId, depth + 1); }});
+            html += `</div>`;
+        }}
+        return html;
+    }}
+
+    // Find top-level parents (parents that are not themselves children of anyone)
+    const allChildren = new Set(Object.values(hier).flat());
+    const topParents = Object.keys(hier).filter(id => !allChildren.has(id));
+
+    if (topParents.length === 0 && Object.keys(hier).length > 0) {{
+        treeDiv.innerHTML = '<p style="color:var(--color-muted);">All requirements with parents are part of cyclic chains. See warnings above.</p>';
+    }} else if (topParents.length === 0) {{
+        treeDiv.innerHTML = '<p style="color:var(--color-muted);">No hierarchy data to display.</p>';
+    }} else {{
+        treeDiv.innerHTML = topParents.map(p => buildNode(p, 0)).join('');
+    }}
+}})();
 </script>
 
 </body>
