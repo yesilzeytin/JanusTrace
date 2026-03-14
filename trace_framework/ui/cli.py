@@ -1,8 +1,14 @@
+"""
+Command Line Interface for JanusTrace.
+"""
 import argparse
+import json
 import logging
-import yaml
 import os
 import sys
+import yaml
+
+from trace_framework.utils.config_validator import ConfigValidator
 from trace_framework.utils.regex_builder import RegexBuilder
 from trace_framework.parsers.doc_parsers import ExcelParser, CSVParser
 from trace_framework.parsers.hdl_parsers import HDLParser
@@ -10,8 +16,6 @@ from trace_framework.core.engine import TraceabilityEngine
 from trace_framework.utils.report_gen import ReportGenerator
 
 logger = logging.getLogger(__name__)
-
-from trace_framework.utils.config_validator import ConfigValidator
 
 def load_config(config_path):
     """Load and parse a YAML configuration file.
@@ -29,23 +33,28 @@ def load_config(config_path):
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Config file not found: {config_path}")
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
             if config is None:
                 raise ValueError(f"Config file is empty: {config_path}")
             return config
     except yaml.YAMLError as e:
-        raise ValueError(f"Invalid YAML in config file {config_path}: {e}")
+        raise ValueError(f"Invalid YAML in config file {config_path}: {e}") from e
 
 def main():
+    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Entry point for the CLI requirement traceability tool."""
     parser = argparse.ArgumentParser(description="Requirement Traceability Tool")
     parser.add_argument("--config", required=True, help="Path to configuration YAML")
-    parser.add_argument("--reqs", required=True, nargs='+', help="Path(s) to requirements file (Excel/CSV)")
+    parser.add_argument("--reqs", required=True, nargs='+',
+                        help="Path(s) to requirements file (Excel/CSV)")
     parser.add_argument("--source", required=True, help="Path to source code directory")
-    parser.add_argument("--output", required=False, default="reports", help="Output directory for reports")
-    parser.add_argument("--waivers", required=False, help="Path to valid_waivers.json dictionary")
-    parser.add_argument("--json", action="store_true", help="Also generate a JSON report alongside HTML")
+    parser.add_argument("--output", required=False, default="reports",
+                        help="Output directory for reports")
+    parser.add_argument("--waivers", required=False,
+                        help="Path to valid_waivers.json dictionary")
+    parser.add_argument("--json", action="store_true",
+                        help="Also generate a JSON report alongside HTML")
 
     args = parser.parse_args()
 
@@ -101,7 +110,7 @@ def main():
     print(f"Scanning for extensions: {supported_extensions}")
 
     print(f"Scanning source code in {source_dir}...")
-    for root, dirs, files in os.walk(source_dir):
+    for root, _dirs, files in os.walk(source_dir):
         for file in files:
             if file.lower().endswith(supported_extensions):
                 path = os.path.join(root, file)
@@ -115,10 +124,10 @@ def main():
     if args.waivers:
         if os.path.exists(args.waivers):
             try:
-                import json
                 with open(args.waivers, 'r', encoding='utf-8') as f:
                     waiver_dict = json.load(f)
                 print(f"Loaded {len(waiver_dict)} waivers.")
+            # pylint: disable=broad-exception-caught
             except Exception as e:
                 print(f"Warning: Could not parse waivers: {e}")
         else:
@@ -143,4 +152,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

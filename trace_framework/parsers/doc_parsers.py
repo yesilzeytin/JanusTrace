@@ -149,7 +149,9 @@ class DocumentTracer:
         builder = RegexBuilder(config)
         self.id_pattern = re.compile(builder.compile_pattern())
 
-    def scan_for_tags(self, file_path: str, link_column: str, source_id_column: str) -> List[TraceObject]:
+    def scan_for_tags(
+        self, file_path: str, link_column: str, source_id_column: str
+    ) -> List[TraceObject]:
         try:
             if file_path.lower().endswith('.csv'):
                 df = pd.read_csv(file_path)

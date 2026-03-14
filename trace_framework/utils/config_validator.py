@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigValidationError:
+    # pylint: disable=too-few-public-methods
     """Represents a single validation error with severity and context.
 
     Attributes:

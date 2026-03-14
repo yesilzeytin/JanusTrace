@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Requirements Waiver Manager**: Introduced a separate GUI window to load unresolved issues (missing/invalid) and mark them as waived with a reason. Generates a `valid_waivers.json` which can be re-loaded for future scans.
 - **Traceability Waivers**: The engine now handles a mapping of IDs to waiver reasons, accurately updating coverage and reflecting a "WAIVED" status in reports.
 - **Waiver Metrics**: The HTML report summary cards now include a "Waived Items" count with a unique blue visual theme.
+- **Static Documentation Hub**: Added a comprehensive multi-page Markdown documentation suite (`docs/`) and a Python generator (`scripts/generate_docs.py`) to produce a themed, side-barred HTML documentation site.
 - **Document-on-Document Tracing**: Added the ability to link two spreadsheets together (e.g. HLR to LLR) using a dedicated "Document" trace mode in CLI or GUI.
 - **R2R Hierarchy**: Collapsible parent-child tree view in the HTML report with automatic cycle and orphan detection.
 - **Security Audit**: Implemented HTML escaping for all user-supplied requirement IDs, descriptions, and contexts to mitigate XSS risks in generated reports.

@@ -4,9 +4,9 @@ Core traceability logic for the JanusTrace framework.
 This module provides the TraceabilityEngine, which acts as the central
 hub for reconciling parsed requirements with discovered source code traces.
 """
+import logging
 from typing import List, Dict, Any
 from trace_framework.core.models import Requirement, TraceObject, ValidationStatus
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ class TraceabilityEngine:
         traces: List[TraceObject],
         waivers: Dict[str, str] = None
     ) -> Dict[str, Any]:
+        # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         """
         Compares requirements against traces to produce a traceability matrix.
 
@@ -37,7 +38,8 @@ class TraceabilityEngine:
 
         Returns:
             A dictionary containing:
-            - 'matrix': List of dicts mapping each requirement to its linked traces and status ('OK' or 'REQ_MISSING').
+            - 'matrix': List of dicts mapping each requirement to its linked
+              traces and status ('OK' or 'REQ_MISSING').
             - 'orphans': List of traces that did not match any requirement ID.
             - 'invalid_reqs': List of requirements with invalid format errors.
             - 'invalid_traces': List of traces with formatting validation errors.
@@ -126,7 +128,8 @@ class TraceabilityEngine:
         covered_count = len([m for m in matrix if m['status'] == 'OK'])
         # valid_req_count excludes invalid-format, duplicate reqs, AND waived requirements
         waived_reqs_count = len([m for m in matrix if m['status'] == 'WAIVED'])
-        valid_req_count = len(requirements) - len(invalid_reqs) - len(duplicate_reqs) - waived_reqs_count
+        valid_req_count = len(requirements) - len(invalid_reqs) - \
+                          len(duplicate_reqs) - waived_reqs_count
         missing_count = len([m for m in matrix if m['status'] == 'REQ_MISSING'])
 
         # Coverage percentage: covered / valid requirements (avoid division by zero)
@@ -153,6 +156,7 @@ class TraceabilityEngine:
             }
         }
     def link_r2r(self, requirements: List[Requirement]) -> Dict[str, Any]:
+        # pylint: disable=too-many-locals
         """
         Builds a requirement-to-requirement (R2R) hierarchy from parent_id fields.
 
@@ -229,4 +233,3 @@ class TraceabilityEngine:
             "cycles": cycles,
             "has_r2r": has_r2r,
         }
-
