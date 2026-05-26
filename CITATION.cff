@@ -1,0 +1,6 @@
+@software{JanusTrace,
+  author = {Ugur Nezir (yesilzeytin@github)},
+  title = {JanusTrace Traceability Software: An open-source alternative to commercial requirement traceability tools},
+  url = {https://github.com/yesilzeytin/JanusTrace},
+  year = {2026}
+}
