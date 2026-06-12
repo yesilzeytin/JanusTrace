@@ -1,6 +1,8 @@
-@software{JanusTrace,
-  author = {Ugur Nezir (yesilzeytin@github)},
-  title = {JanusTrace Traceability Software: An open-source alternative to commercial requirement traceability tools},
-  url = {https://github.com/yesilzeytin/JanusTrace},
-  year = {2026}
-}
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Nezir"
+    given-names: "Ugur"
+title: "JanusTrace Traceability Software: An open-source alternative to commercial requirement traceability tools"
+url: "https://github.com/yesilzeytin/JanusTrace"
+date-released: "2026-06-12"
