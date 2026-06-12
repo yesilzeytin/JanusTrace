@@ -1,3 +1,6 @@
+## Notice of Cancelation
+Unfortunately, my legal obligations require me to stop development on this project. Thus, I can only do minor fixes (i.e. Fixing Linux support and minor interface bugs) and not develop the project further. If anyone would like to take over the project, feel free to contact me. 
+
 # JanusTrace
 
 A requirement-code traceability tool for safety-critical and quality-assured development projects.
